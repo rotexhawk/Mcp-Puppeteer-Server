@@ -1,0 +1,12 @@
+name: MCP Puppeteer Server Addon
+version: "0.1.0"
+slug: mcp_puppeteer
+description: "An add-on for running mCP Puppeteer."
+arch:
+  - aarch64
+  - amd64
+  - armv7
+ports:
+  3000/tcp: 3000
+options:
+  debug: false

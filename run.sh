@@ -1,13 +1,17 @@
-#!/bin/bash
+#!/usr/bin/with-contenv bashio
 
-# Start the Puppeteer container
-docker run -d \
-  --name mcp-puppeteer \
-  --restart always \
-  -e DOCKER_CONTAINER=true \
-  mcp/puppeteer
+# Access add-on options
+DEBUG_MODE=$(bashio::config debug)
 
-# Keep the add-on running (important!)
-while true; do
-  sleep 3600 # Sleep for an hour
-done
+# Start the mCP Puppeteer service
+echo "Starting mCP Puppeteer..."
+
+if [ "$DEBUG_MODE" = "true" ]; then
+  # Example:  Check mCP Puppeteer docs for how to enable debugging.
+  # node dist/index.js --debug  # Adjust as needed
+  node dist/index.js #if no debug option exists, run normally
+else
+  node dist/index.js
+fi
+
+# Do NOT exit the script.
