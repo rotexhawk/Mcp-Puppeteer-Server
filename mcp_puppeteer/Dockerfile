@@ -7,9 +7,9 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 WORKDIR /tmp/build
 
 # Copy source files
-COPY ./mcp_puppeteer/index.ts ./
-COPY ./mcp_puppeteer/package*.json ./
-COPY ./mcp_puppeteer/tsconfig.json ./
+COPY ./index.ts ./
+COPY ./package*.json ./
+COPY ./tsconfig.json ./
 
 # Install dependencies (including devDependencies)
 RUN npm ci  # Use npm ci for reliable builds
