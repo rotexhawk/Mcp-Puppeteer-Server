@@ -1,0 +1,4 @@
+# https://developers.home-assistant.io/docs/add-ons/repository#repository-configuration
+name: Puppeteer MCP Hassio add-on repository
+url: 'https://github.com/rotexhawk/hassio-mcp-puppeteer'
+maintainer: Rotex Hawk <rotexhawk@gmail.com>
