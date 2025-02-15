@@ -1,50 +1,33 @@
-# Use the --platform argument for multi-arch
-FROM --platform=$TARGETPLATFORM node:22-bookworm-slim AS builder
+ARG BUILD_FROM=ghcr.io/hassio-addons/base/amd64:17.1.5
+# hadolint ignore=DL3006
+FROM ${BUILD_FROM}
 
-# Set noninteractive for apt-get
-ENV DEBIAN_FRONTEND noninteractive
-
-# Set Puppeteer environment variables
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
-ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium
+# Set shell
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 WORKDIR /app
 
-# Copy source code for the build stage
+# Copy source (adjust paths if needed, but this should work with your current structure)
 COPY ./mcp_puppeteer/package*.json ./mcp_puppeteer/
 COPY ./mcp_puppeteer/index.ts ./mcp_puppeteer/
-COPY ./mcp_puppeteer/tsconfig.json ./mcp_puppeteer/
+COPY ./mcp_puppeteer/tsconfig.json ./
 
 RUN mkdir -p /project
-RUN cp -r ./mcp_puppeteer/* /project
+RUN cp -r ./mcp_puppeteer/* /project/
 WORKDIR /project/
 
-# Install *all* dependencies (including devDependencies)
+# Install ALL dependencies (including devDependencies for building)
 RUN npm install
 
-# Run the build command
-RUN npm run build
+# Build the TypeScript code
+RUN npm run build  # Ensure this is your correct build command
 
-# --- Final Stage ---
-FROM --platform=$TARGETPLATFORM node:22-bookworm-slim
-
-# Set Puppeteer environment variables
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
-ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium
-
-# Install runtime dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends wget gnupg fonts-ipafont-gothic fonts-wqy-zenhei \
-                       fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
-                       libgtk2.0-0 libnss3 libatk-bridge2.0-0 libdrm2 \
-                       libxkbcommon0 libgbm1 libasound2 chromium && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Copy ONLY the necessary files for runtime
+RUN mkdir -p /app
+RUN cp -r ./dist /app
+RUN cp -r ./node_modules /app
+RUN cp ./package.json /app
 
 WORKDIR /app
-# Copy the build artifacts from the builder stage
-COPY --from=builder /project/dist ./dist
-COPY --from=builder /project/node_modules ./node_modules
-COPY --from=builder /project/package.json ./package.json
 
-# No CMD or ENTRYPOINT
+#Home Assistant will automatically add the labels.
