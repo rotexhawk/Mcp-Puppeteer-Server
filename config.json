@@ -1,0 +1,12 @@
+{
+    "name": "MCP Puppeteer Server",
+    "version": "1.0.0",
+    "slug": "mcp_puppeteer",
+    "description": "MCP Puppeteer Server Add-on",
+    "arch": ["aarch64", "amd64", "armv7"], 
+    "url": "https://github.com/rotexhawk/Mcp-Puppeteer-Server",
+    "options": {},
+    "image": "rotexhawk/hassio-mcp-puppeteer",
+    "hassio_api": true,
+    "network": "host"
+  }
