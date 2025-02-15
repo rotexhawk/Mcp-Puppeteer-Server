@@ -1,33 +1,33 @@
 ARG BUILD_FROM=ghcr.io/hassio-addons/base/amd64:17.1.5
-# hadolint ignore=DL3006
 FROM ${BUILD_FROM}
 
-# Set shell
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
-WORKDIR /app
+# --- Build Stage ---
+WORKDIR /tmp/build
 
-# Copy source (adjust paths if needed, but this should work with your current structure)
-COPY ./mcp_puppeteer/package*.json ./mcp_puppeteer/
-COPY ./mcp_puppeteer/index.ts ./mcp_puppeteer/
+# Copy source files
+COPY ./mcp_puppeteer/index.ts ./
+COPY ./mcp_puppeteer/package*.json ./
 COPY ./mcp_puppeteer/tsconfig.json ./
 
-RUN mkdir -p /project
-RUN cp -r ./mcp_puppeteer/* /project/
-WORKDIR /project/
-
-# Install ALL dependencies (including devDependencies for building)
-RUN npm install
+# Install dependencies (including devDependencies)
+RUN npm ci  # Use npm ci for reliable builds
 
 # Build the TypeScript code
-RUN npm run build  # Ensure this is your correct build command
+RUN npm run build
 
-# Copy ONLY the necessary files for runtime
-RUN mkdir -p /app
-RUN cp -r ./dist /app
-RUN cp -r ./node_modules /app
-RUN cp ./package.json /app
+# --- Prepare rootfs ---
+# Everything that should be in the final container's root (/) goes into /rootfs
+# The base image handles copying this to the right place.
 
+RUN mkdir -p /rootfs/app
+COPY --from=0 /tmp/build/dist /rootfs/app/dist
+COPY --from=0 /tmp/build/node_modules /rootfs/app/node_modules
+COPY --from=0 /tmp/build/package.json /rootfs/app/package.json
+
+
+# Set the working directory (within the rootfs)
 WORKDIR /app
 
-#Home Assistant will automatically add the labels.
+# No CMD or ENTRYPOINT needed - run.sh handles this.
